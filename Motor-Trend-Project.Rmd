@@ -33,7 +33,7 @@ Load necessary libraries for data analysis and developing results.
 
 library(ggplot2)
 library(dplyr)
-# GGally for ...........
+# GGally for the ggpairs function
 library(GGally) 
 # ggfortify
 library(ggfortify)
@@ -49,6 +49,53 @@ data(mtcars)
 
 ### 2.3) Modifying Data 
 
-The "am" variable will be converted to a factor, such that 0 = Automatic and 
-1 = Manual transmission.Similarly,  varaible will also be converted to a factor. 
+The variables "cyl" (# cyclinders), "vs" (engine shape), "am" (transmission),
+"gear" (# of gears) will be converted to factor variables since they are not continous. 
+```{r Factor_Data, warning=FALSE, message=FALSE}
+data(mtcars)
+
+mtcars_data <- mtcars # creating a new mtcars dataframe to be modified
+mtcars_data$cyl <- as.factor(mtcars_data$cyl)
+
+mtcars_data$vs <- as.factor(mtcars_data$vs)
+# Set levels for the engine shape (V-shaped or Straight)
+levels(mtcars_data$vs) <- c("V-shaped", "Straight")
+
+mtcars_data$am <- as.factor(mtcars_data$am)
+# Convert 0 = Automatic and 1 = Manual
+levels(mtcars_data$am) <- c("Automatic", "Manual")
+
+mtcars_data$gear <- as.factor(mtcars_data$gear)
+```
+
+## 3) Exploratory Data Analyses
+
+```{r Expo_Data, warning=FALSE, message=FALSE}
+head(mtcars_data,4) # Sample of the first 4 rows of data
+dim(mtcars_data) # Dimensions of the mtcars_data
+```
+
+In order to understand the relationship between transmission type and fuel economy
+we will develop a box plot to show the impact automatic/manual has on MPG.
+
+Please refer to **Fig. 1** in the Appendix.
+
+After review of **Fig. 1**, it can be seen that manual transmissions results in higher
+MPG. However, it is not clear if other variables are also influencing this outcome,
+and if manual transmission vechicles have higher MPG with all else equal. To do so
+a pair graph will be developed. 
+
+
+
+
+
+
+## TK) Appendix
+
+### **Fig. 1**
+```{r Fig_1, warning=FALSE, message=FALSE}
+Fig_1 <- ggplot(mtcars_data, aes(am, mpg))
+Fig_1 + geom_boxplot(aes(fill = am)) + xlab("Transmission")
+```
+
 
