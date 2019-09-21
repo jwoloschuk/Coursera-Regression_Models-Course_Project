@@ -1,0 +1,54 @@
+---
+title: "Regression Model - Course Project"
+author: "Jordan Woloschuk"
+date: "9/21/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Motor Trend: Analysis on Variables and the Impact on Miles per Gallon
+
+## 1) Executive Summary
+
+
+The purpose of this analysis is to examine a collection of cars and determine the
+relationship between vechicle variables (e.g. number of cyclinders) and fuel
+economy (i.e. miles per gallon).
+
+This analysis will seek to answer the following questions:
+
+1. Is an automatic or manual transmission better for MPG?
+2. Quantify the MPG difference between automatic and manual transmissions?
+
+
+## 2) Data Processing
+
+### 2.1) Loading Libraries
+
+Load necessary libraries for data analysis and developing results.
+```{r Libraries, warning=FALSE, message=FALSE}
+
+library(ggplot2)
+library(dplyr)
+# GGally for ...........
+library(GGally) 
+# ggfortify
+library(ggfortify)
+
+```
+
+### 2.2) Loading Data
+
+Load necessary mtcars dataset.
+```{r Data, warning=FALSE, message=FALSE}
+data(mtcars)
+```
+
+### 2.3) Modifying Data 
+
+The "am" variable will be converted to a factor, such that 0 = Automatic and 
+1 = Manual transmission.Similarly,  varaible will also be converted to a factor. 
+
