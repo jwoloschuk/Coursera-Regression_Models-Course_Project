@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 1) Executive Summary
 
+### 1.1) Overview
+
 
 The purpose of this analysis is to examine a collection of cars and determine the
 relationship between vechicle variables (e.g. number of cyclinders) and fuel
@@ -23,6 +25,18 @@ This analysis will seek to answer the following questions:
 1. Is an automatic or manual transmission better for MPG?
 2. Quantify the MPG difference between automatic and manual transmissions?
 
+### 1.2) Conclusion
+
+The analysis conducted indicates that holding all other variables equal, a car with
+manual transmission will have a higher MPG and therefore better fuel economy. 
+
+The *final_model* determined that a car's MPG was dependent on the transmission 
+type, weight of the car and the acceleration of the car (1/4 mile time). This model
+indicates that cars with manual transmission will have ~2.94 more miles per gallon
+comapred to a car with an automatic transmissions. However, since cars with 
+automatic transmission tend to weigh more compared to cars with manual transmission
+this interation could be influencing the final result. 
+
 
 ## 2) Data Processing
 
@@ -30,14 +44,9 @@ This analysis will seek to answer the following questions:
 
 Load necessary libraries for data analysis and developing results.
 ```{r Libraries, warning=FALSE, message=FALSE}
-
 library(ggplot2)
 library(dplyr)
-# GGally for the ggpairs function
-library(GGally) 
-# ggfortify
-library(ggfortify)
-
+library(ggfortify) # ggfortify for autoplot
 ```
 
 ### 2.2) Loading Data
@@ -52,8 +61,6 @@ data(mtcars)
 The variables "cyl" (# cyclinders), "vs" (engine shape), "am" (transmission),
 "gear" (# of gears) will be converted to factor variables since they are not continous. 
 ```{r Factor_Data, warning=FALSE, message=FALSE}
-data(mtcars)
-
 mtcars_data <- mtcars # creating a new mtcars dataframe to be modified
 mtcars_data$cyl <- as.factor(mtcars_data$cyl)
 
@@ -70,27 +77,83 @@ mtcars_data$gear <- as.factor(mtcars_data$gear)
 
 ## 3) Exploratory Data Analyses
 
-```{r Expo_Data, warning=FALSE, message=FALSE}
-head(mtcars_data,4) # Sample of the first 4 rows of data
+```{r Expo_Data, results= 'hide'}
+# Note following table and dim output hidden due to page limit. See Table 1.
+head(mtcars_data,2) # Sample of the first 4 rows of data
 dim(mtcars_data) # Dimensions of the mtcars_data
 ```
 
 In order to understand the relationship between transmission type and fuel economy
-we will develop a box plot to show the impact automatic/manual has on MPG.
+we will develop a box plot to show the impact automatic/manual has on MPG. Please
+refer to **Fig. 1** in the Appendix.
 
-Please refer to **Fig. 1** in the Appendix.
-
-After review of **Fig. 1**, it can be seen that manual transmissions results in higher
+After reviewing **Fig. 1**, it can be seen that manual transmissions results in higher
 MPG. However, it is not clear if other variables are also influencing this outcome,
 and if manual transmission vechicles have higher MPG with all else equal. To do so
-a pair graph will be developed. 
+a pair graph will be developed. Please refer to **Fig. 2**.
+
+After reviewing **Fig. 2**, it can be seen that other vaiables have correlation; 
+including "wt" (weight), "disp" (displacement), "cyl" (# of cyclinders), and 
+"hp" (horsepower).
 
 
+## 4) Modelling
 
+### 4.1) Linear Regression Model
 
+We will first develop a basic linear model to examine transmission type vs. MPG.
 
+```{r lm_linear, warning=FALSE, message=FALSE}
+lm_linear <- lm(mpg ~ am, mtcars_data) # Basic linear model
+summary(lm_linear)$coefficients[,4] # P-value coefficient
+summary(lm_linear)$r.squared
+```
 
-## TK) Appendix
+Since the p-value is quite small and the R-quared value is equally small, it
+indicates that additional variables are needed to accurately model the relation
+between transmission type and MPG. 
+
+### 4.2) Multivariable Regression Model
+
+We will now develop a multivaribale regression model with all possible variables
+to identify significant variables to use in the final model. 
+
+```{r lm_all, results= 'hide'}
+lm_all <- lm(mpg ~ ., mtcars_data) # Multivariable linear model
+summary(lm_all) # Note summary table hidden due to page limit See Table 2.
+```
+
+A better match is obtained compared to the basic linear model (higher
+R-squared value). However, the coefficients are not significant.
+
+We will use the *Backward Selection Method* to determine the optimum model. This 
+method will add/remove varaibles in order to find the optimum combination to include
+in the final model. 
+
+```{r Backward, results= 'hide'}
+optimum_model <- step(lm_all, direction = 'both', trace = FALSE)
+summary(optimum_model) # Note summary table hidden due to page limit. See Table 3.
+```
+
+This method identifies "wt" (weight), "qsec" (1/4 mile time), and "am" 
+(transmission). Therefore, MPG is dependent on the transmission type, weight of 
+the car and the acceleration of the car.
+
+```{r Final, results= 'hide'}
+final_model <- lm(mpg ~ wt + qsec + am, mtcars_data)
+summary(final_model) # Note summary table hidden due to page limit. See Table 4.
+```
+
+Please refer to **Fig. 3** and the following:
+
+  * The Residual vs Fitted chart appear random, with no pattern.
+  * The Noraml Q-Q chart shows the residuals arenormally distributed.
+  * The Scale-Location chart indicates the residuals are randomly distributed.
+  * The Residuals vs. Leverage indicates no outliers exist. 
+  
+Please refer to section *1.2) Conclusion* for key takeaways and results.
+
+## 5) Appendix
 
 ### **Fig. 1**
 ```{r Fig_1, warning=FALSE, message=FALSE}
@@ -98,4 +161,33 @@ Fig_1 <- ggplot(mtcars_data, aes(am, mpg))
 Fig_1 + geom_boxplot(aes(fill = am)) + xlab("Transmission")
 ```
 
+### **Fig. 2**
+```{r Fig_2, warning=FALSE, message=FALSE}
+pairs(mtcars_data, panel = panel.smooth, main="Pair Graph of Motor Trend Car Road Tests Data")
+```
 
+### **Fig. 3**
+```{r Fig_3, warning=FALSE, message=FALSE}
+autoplot(final_model)
+```
+
+### **Table 1**
+```{r Tab_1, warning=FALSE, message=FALSE}
+head(mtcars_data,2) # Sample of the first 4 rows of data
+dim(mtcars_data) # Dimensions of the mtcars_data
+```
+
+### **Table 2**
+```{r Tab_2, warning=FALSE, message=FALSE}
+summary(lm_all)$coefficients
+```
+
+### **Table 3**
+```{r Tab_3, warning=FALSE, message=FALSE}
+summary(optimum_model)$coefficients
+```
+
+### **Table 4**
+```{r Tab_4, warning=FALSE, message=FALSE}
+summary(final_model)$coefficients
+```
