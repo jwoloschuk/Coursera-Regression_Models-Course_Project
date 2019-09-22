@@ -9,7 +9,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Motor Trend: Analysis on Variables and the Impact on Miles per Gallon
+# Motor Trend: Analysis on Variables and the Impact on MPG
 
 ## 1) Executive Summary
 
